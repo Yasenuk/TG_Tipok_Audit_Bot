@@ -35,14 +35,14 @@ export function formatReport(report: ReportInput): string {
     .join('\n');
 }
 
-export async function sendReport(report: ReportInput): Promise<void> {
-  if (!env.REPORT_CHAT_ID) {
+export async function sendReport(REPORT_CHAT_ID: string | number, report: ReportInput): Promise<void> {
+  if (REPORT_CHAT_ID) {
     console.warn('REPORT_CHAT_ID не заданий — звіт не відправлено');
     return;
   }
 
   // TODO: фото пунктів окремим media group після тексту
-  await bot.telegram.sendMessage(env.REPORT_CHAT_ID, formatReport(report), {
+  await bot.telegram.sendMessage(REPORT_CHAT_ID, formatReport(report), {
     parse_mode: 'HTML',
   });
 }
