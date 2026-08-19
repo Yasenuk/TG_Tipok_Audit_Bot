@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-bg: var(--tg-theme-bg-color, #ffffff);
+  --color-surface: var(--tg-theme-secondary-bg-color, #f4f4f5);
+  --color-fg: var(--tg-theme-text-color, #0f0f0f);
+  --color-muted: var(--tg-theme-hint-color, #707579);
+  --color-accent: var(--tg-theme-button-color, #2f7cf6);
+  --color-accent-fg: var(--tg-theme-button-text-color, #ffffff);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  overscroll-behavior-y: none;
+}
