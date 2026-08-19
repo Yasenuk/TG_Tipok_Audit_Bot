@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
+
 import type { MeResponse } from '@sa/shared';
 import { api } from './lib/api.js';
+
+import { AuditForm } from './pages/AuditForm.js';
 
 type Screen = { name: 'stores' } | { name: 'audit'; storeId: string } | { name: 'admin' };
 
@@ -21,7 +24,17 @@ export function App() {
 
   return (
 		<main className="mx-auto max-w-xl p-4">
+
+
+			{screen.name === 'audit' && (
+        <AuditForm
+          storeId={screen.storeId}
+          me={me}
+          onDone={() => setScreen({ name: 'stores' })}
+        />
+			)}
 			
+
     </main>
   );
 }
