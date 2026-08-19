@@ -10,6 +10,11 @@
     "node": ">=22.12"
   },
   "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:server": "npm run dev -w @sa/server",
+    "dev:miniapp": "npm run dev -w @sa/miniapp",
+    "build": "npm run build -w @sa/miniapp && npm run build -w @sa/server",
+    "start": "npm run start -w @sa/server",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "db:generate": "npm run generate -w @sa/db",
     "db:migrate": "npm run migrate -w @sa/db",
