@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  REVISOR
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(cuid())
+  tgId      String   @unique
+  name      String
+  role      Role     @default(REVISOR)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  audits Audit[]
+}
+
+model Store {
+  id        String  @id @default(cuid())
+  city      String
+  address   String
+  sheetName String  @unique
+  order     Int     @default(0)
+  isActive  Boolean @default(true)
+
+  audits Audit[]
+
+  @@unique([city, address])
+}
+
+model ChecklistItem {
+  id       String  @id @default(cuid())
+  label    String
+  order    Int
+  isActive Boolean @default(true)
+
+  auditItems AuditItem[]
+}
+
+model Audit {
+  id        String   @id @default(cuid())
+  storeId   String
+  userId    String
+  total     Int
+  maxTotal  Int
+  createdAt DateTime @default(now())
+
+  store Store       @relation(fields: [storeId], references: [id])
+  user  User        @relation(fields: [userId], references: [id])
+  items AuditItem[]
+
+  @@index([storeId, createdAt])
+  @@index([createdAt])
+}
+
+model AuditItem {
+  id        String   @id @default(cuid())
+  auditId   String
+  itemId    String?
+  itemLabel String
+  itemOrder Int
+  score     Int
+  comment   String?
+  photos    String[]
+
+  audit Audit          @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  item  ChecklistItem? @relation(fields: [itemId], references: [id], onDelete: SetNull)
+
+  @@unique([auditId, itemId])
+}
