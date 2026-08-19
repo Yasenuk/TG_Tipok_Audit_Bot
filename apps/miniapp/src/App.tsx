@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import type { MeResponse } from '@sa/shared';
 import { api } from './lib/api.js';
 
-import { StoreSelect } from './pages/StoreSelect.js';
 import { AuditForm } from './pages/AuditForm.js';
+import { StoreSelect } from './pages/StoreSelect.js';
+import { AdminPanel } from './pages/admin/AdminPanel.js';
 
 type Screen = { name: 'stores' } | { name: 'audit'; storeId: string } | { name: 'admin' };
 
@@ -41,7 +42,7 @@ export function App() {
 				/>
 			)}
 
-
+			{screen.name === 'admin' && <AdminPanel onBack={() => setScreen({ name: 'stores' })} />}
 		</main>
 	);
 }
