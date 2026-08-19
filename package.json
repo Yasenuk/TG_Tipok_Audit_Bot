@@ -1,7 +1,6 @@
 {
   "name": "tg_tipok_audit_bot",
   "private": "true",
-  "version": "1.0.0",
   "type": "module",
   "workspaces": [
     "packages/*",
@@ -14,10 +13,10 @@
     "type": "git",
     "url": "https://github/Yasenuk/TG_Tipok_Audit_Bot.git"
   },
+  "devDependencies": {
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  },
   "license": "MIT",
-  "author": "Yatseniuk Vladyslav",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  }
+  "author": "Yatseniuk Vladyslav"
 }
