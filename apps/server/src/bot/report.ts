@@ -1,6 +1,5 @@
 import { calcScore, formatSummary } from '@sa/shared';
 import { bot } from './index.js';
-import { env } from '../env.js';
 
 interface ReportInput {
   storeLabel: string;
@@ -18,7 +17,9 @@ export function formatReport(report: ReportInput): string {
 
   const lines = report.items.map((item) => {
     const score = item.score === 0 ? '—' : String(item.score);
-    return `${escapeHtml(item.itemLabel)} — ${score}`;
+    const comment = item.comment ? `\n   <i>${escapeHtml(item.comment)}</i>` : '';
+
+    return `${escapeHtml(item.itemLabel)} — ${score}${comment}`;
   });
 
   return [
@@ -35,14 +36,12 @@ export function formatReport(report: ReportInput): string {
     .join('\n');
 }
 
-export async function sendReport(REPORT_CHAT_ID: string | number, report: ReportInput): Promise<void> {
-  if (!REPORT_CHAT_ID) {
-    console.warn('REPORT_CHAT_ID не заданий — звіт не відправлено');
+export async function sendReport(chatId: string | number, report: ReportInput): Promise<void> {
+  if (!chatId) {
+    console.warn('sendReport: не вказано chatId — звіт не відправлено');
     return;
   }
 
   // TODO: фото пунктів окремим media group після тексту
-  await bot.telegram.sendMessage(REPORT_CHAT_ID, formatReport(report), {
-    parse_mode: 'HTML',
-  });
+  await bot.telegram.sendMessage(chatId, formatReport(report), { parse_mode: 'HTML' });
 }

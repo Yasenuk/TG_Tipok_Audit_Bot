@@ -4,6 +4,8 @@ import { prisma } from '@sa/db';
 
 export const WEBHOOK_PATH = '/telegraf/webhook';
 
+export const webAppUrl = env.MINIAPP_URL ?? env.PUBLIC_URL;
+
 export const bot = new Telegraf(env.BOT_TOKEN);
 
 bot.start(async (ctx) => {
@@ -15,14 +17,14 @@ bot.start(async (ctx) => {
     return;
   }
 
-  if (!env.PUBLIC_URL) {
-    await ctx.reply('Mini App недоступний у dev-режимі без PUBLIC_URL.');
+  if (!webAppUrl) {
+    await ctx.reply('Mini App недоступний: не задано ні MINIAPP_URL, ні PUBLIC_URL.');
     return;
   }
 
   await ctx.reply(
     `Вітаю, ${user.name}. Відкривай перевірку:`,
-    Markup.inlineKeyboard([Markup.button.webApp('Відкрити', env.PUBLIC_URL)]),
+    Markup.inlineKeyboard([Markup.button.webApp('Відкрити', webAppUrl)]),
   );
 });
 

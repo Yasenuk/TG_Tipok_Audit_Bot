@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
+import { HttpError } from '../lib/http-error.js';
 
 export function errorHandler(
   error: unknown,
@@ -9,6 +10,11 @@ export function errorHandler(
 ): void {
   if (error instanceof ZodError) {
     res.status(400).json({ error: 'Некоректні дані', issues: error.issues });
+    return;
+  }
+
+  if (error instanceof HttpError) {
+    res.status(error.status).json({ error: error.message });
     return;
   }
 

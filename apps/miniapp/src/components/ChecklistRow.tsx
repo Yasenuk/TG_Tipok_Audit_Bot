@@ -1,5 +1,6 @@
 import type { ChecklistItemDto } from '@sa/shared';
 import type { ItemState } from '../pages/AuditForm.js';
+import { PhotoPicker } from './PhotoPicker.js';
 
 interface Props {
   item: ChecklistItemDto;
@@ -29,7 +30,16 @@ export function ChecklistRow({ item, value, onChange }: Props) {
         ))}
       </div>
 
-      {/* TODO: коментар + завантаження фото (PhotoPicker) */}
+      <textarea
+        value={value.comment}
+        onChange={(event) => onChange({ comment: event.target.value })}
+        placeholder="Коментар (за потреби)"
+        rows={2}
+        maxLength={500}
+        className="mt-2 w-full resize-none rounded-lg bg-bg p-2 text-sm placeholder:text-muted"
+      />
+
+      <PhotoPicker photos={value.photos} onChange={(photos) => onChange({ photos })} />
     </article>
   );
 }

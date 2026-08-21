@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react(), tailwind()],
   server: {
     port: 5173,
+    allowedHosts: ['.trycloudflare.com', '.ngrok-free.app', '.ngrok.io'],
     proxy: {
       '/api': 'http://localhost:3000',
     },
