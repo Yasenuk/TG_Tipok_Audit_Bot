@@ -27,14 +27,20 @@ export function useDraft<T>(key: string, initial: T) {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const draft: StoredDraft<T> = { savedAt: Date.now(), data: value };
-      localStorage.setItem(key, JSON.stringify(draft));
+      try {
+        const draft: StoredDraft<T> = { savedAt: Date.now(), data: value };
+        localStorage.setItem(key, JSON.stringify(draft));
+      } catch { }
     }, 300);
 
     return () => clearTimeout(timer);
   }, [key, value]);
 
-  const clear = useCallback(() => localStorage.removeItem(key), [key]);
+  const clear = useCallback(() => {
+    try {
+      localStorage.removeItem(key);
+    } catch { }
+  }, [key]);
 
   return [value, setValue, clear] as const;
 }

@@ -36,7 +36,7 @@ export function formatReport(report: ReportInput): string {
 }
 
 export async function sendReport(REPORT_CHAT_ID: string | number, report: ReportInput): Promise<void> {
-  if (REPORT_CHAT_ID) {
+  if (!REPORT_CHAT_ID) {
     console.warn('REPORT_CHAT_ID не заданий — звіт не відправлено');
     return;
   }

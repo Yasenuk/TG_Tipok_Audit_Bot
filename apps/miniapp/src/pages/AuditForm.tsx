@@ -11,7 +11,7 @@ interface Props {
 }
 
 export interface ItemState {
-  score: number;
+  score: number | null;
   comment: string;
   photos: string[];
 }
@@ -26,7 +26,10 @@ export function AuditForm({ storeId, me, onDone }: Props) {
     void api.get<ChecklistItemDto[]>('/checklist').then((res) => setItems(res.data));
   }, []);
 
-  const summary = calcScore(items.map((item) => ({ score: values[item.id]?.score ?? 0 })));
+  const untouched = items.filter((i) => (values[i.id]?.score ?? null) === null).length;
+  const summary = calcScore(
+    items.map((i) => ({ score: values[i.id]?.score ?? 0 })),
+  );
 
   const patch = (itemId: string, next: Partial<ItemState>) =>
     setValues((prev) => ({
@@ -57,6 +60,7 @@ export function AuditForm({ storeId, me, onDone }: Props) {
           type="button"
           onClick={submit}
           className="w-full rounded-xl bg-accent p-3 text-accent-fg"
+          disabled={untouched > 0}
         >
           Завершити перевірку
         </button>
