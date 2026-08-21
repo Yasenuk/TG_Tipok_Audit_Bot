@@ -27,14 +27,23 @@ export const submitAuditSchema = z
 export const storeInputSchema = z.object({
   city: z.string().trim().min(1),
   address: z.string().trim().min(1),
-  sheetName: z.string().trim().min(1).max(31),
   isActive: z.boolean().default(true),
 });
 
+export const storeUpdateSchema = storeInputSchema
+  .extend({ sheetName: z.string().trim().min(1).max(31) })
+  .partial();
+
 export const checklistItemInputSchema = z.object({
   label: z.string().trim().min(1).max(200),
-  order: z.number().int().min(0),
+  order: z.number().int().min(0).optional(),
   isActive: z.boolean().default(true),
+});
+
+export const checklistItemUpdateSchema = checklistItemInputSchema.partial();
+
+export const reorderSchema = z.object({
+  ids: z.array(z.string().min(1)).min(1),
 });
 
 export const userInputSchema = z.object({
@@ -43,6 +52,8 @@ export const userInputSchema = z.object({
   role: z.enum(['REVISOR', 'ADMIN']),
   isActive: z.boolean().default(true),
 });
+
+export const userUpdateSchema = userInputSchema.omit({ tgId: true }).partial();
 
 export const exportQuerySchema = z.object({
   storeIds: z.array(z.string()).optional(),
@@ -53,6 +64,9 @@ export const exportQuerySchema = z.object({
 export type AuditItemInput = z.infer<typeof auditItemInputSchema>;
 export type SubmitAuditInput = z.infer<typeof submitAuditSchema>;
 export type StoreInput = z.infer<typeof storeInputSchema>;
+export type StoreUpdate = z.infer<typeof storeUpdateSchema>;
 export type ChecklistItemInput = z.infer<typeof checklistItemInputSchema>;
+export type ChecklistItemUpdate = z.infer<typeof checklistItemUpdateSchema>;
 export type UserInput = z.infer<typeof userInputSchema>;
+export type UserUpdate = z.infer<typeof userUpdateSchema>;
 export type ExportQuery = z.infer<typeof exportQuerySchema>;
