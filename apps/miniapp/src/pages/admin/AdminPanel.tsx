@@ -1,10 +1,26 @@
+import { useState } from 'react';
+import { HistoryTab } from './HistoryTab.js';
+import { StoresTab } from './StoresTab.js';
+import { ChecklistTab } from './ChecklistTab.js';
+import { UsersTab } from './UsersTab.js';
+
 interface Props {
   onBack: () => void;
 }
 
-const TABS = ['Історія', 'Точки', 'Чек-лист', 'Ревізори', 'Експорт'] as const;
+const TABS = [
+  { key: 'history', label: 'Історія' },
+  { key: 'stores', label: 'Точки' },
+  { key: 'checklist', label: 'Чек-лист' },
+  { key: 'users', label: 'Ревізори' },
+  { key: 'export', label: 'Експорт' },
+] as const;
+
+type TabKey = (typeof TABS)[number]['key'];
 
 export function AdminPanel({ onBack }: Props) {
+  const [tab, setTab] = useState<TabKey>('history');
+
   return (
     <section className="flex flex-col gap-3">
       <button type="button" onClick={onBack} className="self-start text-sm text-accent">
@@ -12,14 +28,27 @@ export function AdminPanel({ onBack }: Props) {
       </button>
 
       <nav className="flex gap-2 overflow-x-auto">
-        {TABS.map((tab) => (
-          <button key={tab} type="button" className="rounded-lg bg-surface px-3 py-2 text-sm">
-            {tab}
+        {TABS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setTab(key)}
+            className={`shrink-0 rounded-lg px-3 py-2 text-sm ${
+              tab === key ? 'bg-accent text-accent-fg' : 'bg-surface'
+            }`}
+          >
+            {label}
           </button>
         ))}
       </nav>
 
-      {/* TODO: вкладки - таблиця перевірок, CRUD точок/пунктів/ревізорів, кнопка експорту */}
+      {tab === 'history' && <HistoryTab />}
+      {tab === 'stores' && <StoresTab />}
+      {tab === 'checklist' && <ChecklistTab />}
+      {tab === 'users' && <UsersTab />}
+      {tab === 'export' && (
+        <p className="text-sm text-muted">Буде доступний після того, як зробимо XLSX.</p>
+      )}
     </section>
   );
 }

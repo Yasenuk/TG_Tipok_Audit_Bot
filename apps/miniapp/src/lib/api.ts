@@ -11,3 +11,12 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
+
+export function apiError(error: unknown, fallback = 'Щось пішло не так'): string {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { error?: string } | undefined;
+    return data?.error ?? error.message;
+  }
+
+  return fallback;
+}
