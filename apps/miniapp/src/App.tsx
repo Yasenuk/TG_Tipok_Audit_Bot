@@ -18,7 +18,7 @@ export function App() {
 		api
 			.get<MeResponse>('/me')
 			.then((res) => setMe(res.data))
-			.catch(() => setError('Немає доступу. Звернітся до адміністратора.'));
+			.catch(() => setError('Немає доступу. Зверніться до адміністратора.'));
 	}, []);
 
 	if (error) return <p className="p-4 text-center text-muted">{error}</p>;

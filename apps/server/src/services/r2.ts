@@ -1,5 +1,11 @@
 import { randomUUID } from 'node:crypto';
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectsCommand,
+  GetObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from '../env.js';
 import { HttpError } from '../lib/http-error.js';
@@ -15,6 +21,7 @@ export type AllowedMime = keyof typeof EXTENSIONS;
 const PUT_TTL_SECONDS = 5 * 60;
 const GET_TTL_SECONDS = 60 * 60;
 const KEY_PREFIX = 'audits';
+const DELETE_BATCH = 1000;
 
 let cached: S3Client | null = null;
 
@@ -67,4 +74,45 @@ export async function createPresignedGet(key: string): Promise<string> {
   });
 }
 
-// TODO: deleteOrphans() — ключі, завантажені у формі, яку так і не здали
+export interface StoredObject {
+  key: string;
+  lastModified: Date;
+}
+
+export async function listAllObjects(): Promise<StoredObject[]> {
+  const objects: StoredObject[] = [];
+  let token: string | undefined;
+
+  do {
+    const page = await client().send(
+      new ListObjectsV2Command({
+        Bucket: env.R2_BUCKET,
+        Prefix: `${KEY_PREFIX}/`,
+        ContinuationToken: token,
+      }),
+    );
+
+    for (const item of page.Contents ?? []) {
+      if (item.Key && item.LastModified) {
+        objects.push({ key: item.Key, lastModified: item.LastModified });
+      }
+    }
+
+    token = page.NextContinuationToken;
+  } while (token);
+
+  return objects;
+}
+
+export async function deleteObjects(keys: string[]): Promise<void> {
+  for (let index = 0; index < keys.length; index += DELETE_BATCH) {
+    const batch = keys.slice(index, index + DELETE_BATCH);
+
+    await client().send(
+      new DeleteObjectsCommand({
+        Bucket: env.R2_BUCKET,
+        Delete: { Objects: batch.map((Key) => ({ Key })) },
+      }),
+    );
+  }
+}

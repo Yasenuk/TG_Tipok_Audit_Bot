@@ -1,10 +1,17 @@
 import crypto from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
+import { z } from 'zod';
 import type { Role } from '@sa/shared';
 import { env, isProd } from '../env.js';
 import { prisma } from '@sa/db';
 
 const MAX_AUTH_AGE_SECONDS = 60 * 60 * 24;
+
+const initDataUserSchema = z.object({
+  id: z.number().int().positive(),
+  first_name: z.string().optional(),
+  last_name: z.string().optional(),
+});
 
 export interface AuthUser {
   id: string;
@@ -43,11 +50,17 @@ export function parseInitData(initData: string): { tgId: string; name: string } 
   const rawUser = params.get('user');
   if (!rawUser) return null;
 
-  const user = JSON.parse(rawUser) as { id: number; first_name?: string; last_name?: string };
+  let parsed: z.infer<typeof initDataUserSchema>;
+
+  try {
+    parsed = initDataUserSchema.parse(JSON.parse(rawUser));
+  } catch {
+    return null;
+  }
 
   return {
-    tgId: String(user.id),
-    name: [user.first_name, user.last_name].filter(Boolean).join(' ') || String(user.id),
+    tgId: String(parsed.id),
+    name: [parsed.first_name, parsed.last_name].filter(Boolean).join(' ') || String(parsed.id),
   };
 }
 

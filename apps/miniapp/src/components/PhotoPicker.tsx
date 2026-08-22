@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { MAX_PHOTOS_PER_ITEM } from '@sa/shared';
 import { uploadPhoto } from '../lib/upload.js';
+import { PhotoThumb } from './PhotoThumb.js';
 
 interface Props {
   photos: string[];
@@ -45,11 +46,12 @@ export function PhotoPicker({ photos, onChange }: Props) {
       <div className="flex flex-wrap gap-2">
         {photos.map((key) => (
           <div key={key} className="relative">
-            <img
-              src={previews[key]}
-              alt=""
-              className="h-16 w-16 rounded-lg bg-bg object-cover"
-            />
+            {previews[key] ? (
+              <img src={previews[key]} alt="" className="h-16 w-16 rounded-lg bg-bg object-cover" />
+            ) : (
+              <PhotoThumb photoKey={key} />
+            )}
+
             <button
               type="button"
               onClick={() => remove(key)}

@@ -10,6 +10,7 @@ import {
 } from '@sa/shared';
 import { prisma } from '@sa/db';
 import { generateSheetName } from '../services/stores.js';
+import { cleanupOrphanPhotos } from '../services/photo-cleanup.js';
 import { HttpError } from '../lib/http-error.js';
 
 export const adminRouter = Router();
@@ -162,6 +163,17 @@ adminRouter.patch('/users/:id', async (req, res, next) => {
     }
 
     res.json(await prisma.user.update({ where: { id }, data: body }));
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ─── Обслуговування ───────────────────────────────────────────────────────────
+
+adminRouter.post('/photos/cleanup', async (req, res, next) => {
+  try {
+    const dryRun = req.query.dryRun === '1' || req.query.dryRun === 'true';
+    res.json(await cleanupOrphanPhotos(dryRun));
   } catch (error) {
     next(error);
   }
