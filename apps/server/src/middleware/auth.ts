@@ -67,7 +67,9 @@ export function parseInitData(initData: string): { tgId: string; name: string } 
 export async function auth(req: Request, res: Response, next: NextFunction): Promise<void> {
   const initData = req.header('x-init-data');
 
-  const devTgId = !isProd ? req.header('x-dev-tg-id') : undefined;
+
+  const devAuthAllowed = !isProd && !env.PUBLIC_URL;
+  const devTgId = devAuthAllowed ? req.header('x-dev-tg-id') : undefined;
   const parsed = devTgId ? { tgId: devTgId, name: 'dev' } : initData ? parseInitData(initData) : null;
 
   if (!parsed) {
