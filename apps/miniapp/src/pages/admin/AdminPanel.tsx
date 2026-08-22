@@ -3,6 +3,7 @@ import { HistoryTab } from './HistoryTab.js';
 import { StoresTab } from './StoresTab.js';
 import { ChecklistTab } from './ChecklistTab.js';
 import { UsersTab } from './UsersTab.js';
+import { ExportTab } from './ExportTab.js';
 
 interface Props {
   onBack: () => void;
@@ -46,9 +47,7 @@ export function AdminPanel({ onBack }: Props) {
       {tab === 'stores' && <StoresTab />}
       {tab === 'checklist' && <ChecklistTab />}
       {tab === 'users' && <UsersTab />}
-      {tab === 'export' && (
-        <p className="text-sm text-muted">Буде доступний після того, як зробимо XLSX.</p>
-      )}
+      {tab === 'export' && <ExportTab />}
     </section>
   );
 }

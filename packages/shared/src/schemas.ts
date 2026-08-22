@@ -55,8 +55,13 @@ export const userInputSchema = z.object({
 
 export const userUpdateSchema = userInputSchema.omit({ tgId: true }).partial();
 
+const csvIds = z.preprocess(
+  (value) => (typeof value === 'string' ? value.split(',').filter(Boolean) : value),
+  z.array(z.string()).optional(),
+);
+
 export const exportQuerySchema = z.object({
-  storeIds: z.array(z.string()).optional(),
+  storeIds: csvIds,
   from: z.coerce.date().optional(),
   to: z.coerce.date().optional(),
 });
