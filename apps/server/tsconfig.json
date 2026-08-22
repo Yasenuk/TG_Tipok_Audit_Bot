@@ -5,9 +5,7 @@
     "moduleResolution": "NodeNext",
     "lib": ["ES2023"],
     "types": ["node"],
-    "outDir": "dist",
-    "rootDir": "../..",
-    "noEmit": false
+    "noEmit": true
   },
   "include": ["src", "../../packages/shared/src", "../../packages/db/src", "../../packages/db/generated"]
 }
