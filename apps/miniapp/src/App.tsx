@@ -5,9 +5,14 @@ import { api } from './lib/api.js';
 
 import { AuditForm } from './pages/AuditForm.js';
 import { StoreSelect } from './pages/StoreSelect.js';
+import { HistoryTab } from './pages/admin/HistoryTab.js';
 import { AdminPanel } from './pages/admin/AdminPanel.js';
 
-type Screen = { name: 'stores' } | { name: 'audit'; storeId: string } | { name: 'admin' };
+type Screen =
+	| { name: 'stores' }
+	| { name: 'audit'; storeId: string }
+	| { name: 'history' }
+	| { name: 'admin' };
 
 export function App() {
 	const [me, setMe] = useState<MeResponse | null>(null);
@@ -30,6 +35,7 @@ export function App() {
 				<StoreSelect
 					me={me}
 					onPick={(storeId) => setScreen({ name: 'audit', storeId })}
+					onHistory={() => setScreen({ name: 'history' })}
 					onAdmin={() => setScreen({ name: 'admin' })}
 				/>
 			)}
@@ -40,6 +46,22 @@ export function App() {
 					me={me}
 					onDone={() => setScreen({ name: 'stores' })}
 				/>
+			)}
+
+			{screen.name === 'history' && (
+				<section className="flex flex-col gap-3">
+					<button
+						type="button"
+						onClick={() => setScreen({ name: 'stores' })}
+						className="self-start text-sm text-accent"
+					>
+						← Назад
+					</button>
+
+					<h1 className="text-lg font-semibold">Мої перевірки</h1>
+
+					<HistoryTab showRevisor={me.role === 'ADMIN'} />
+				</section>
 			)}
 
 			{screen.name === 'admin' && <AdminPanel onBack={() => setScreen({ name: 'stores' })} />}

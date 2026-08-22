@@ -5,10 +5,11 @@ import { api } from '../lib/api.js';
 interface Props {
   me: MeResponse;
   onPick: (storeId: string) => void;
+  onHistory: () => void;
   onAdmin: () => void;
 }
 
-export function StoreSelect({ me, onPick, onAdmin }: Props) {
+export function StoreSelect({ me, onPick, onHistory, onAdmin }: Props) {
   const [stores, setStores] = useState<StoreDto[]>([]);
 
   useEffect(() => {
@@ -31,11 +32,17 @@ export function StoreSelect({ me, onPick, onAdmin }: Props) {
         </button>
       ))}
 
-      {me.role === 'ADMIN' && (
-        <button type="button" onClick={onAdmin} className="mt-2 text-sm text-accent">
-          Адмін-панель
+      <div className="mt-2 flex gap-4">
+        <button type="button" onClick={onHistory} className="text-sm text-accent">
+          Мої перевірки
         </button>
-      )}
+
+        {me.role === 'ADMIN' && (
+          <button type="button" onClick={onAdmin} className="text-sm text-accent">
+            Адмін-панель
+          </button>
+        )}
+      </div>
     </section>
   );
 }

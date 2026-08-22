@@ -3,6 +3,10 @@ import type { AuditDetailDto, AuditListItemDto, PagedResponse } from '@sa/shared
 import { useResource } from '../../hooks/useResource.js';
 import { PhotoThumb } from '../../components/PhotoThumb.js';
 
+interface Props {
+  showRevisor?: boolean;
+}
+
 function AuditDetail({ id }: { id: string }) {
   const { data, error, loading } = useResource<AuditDetailDto>(`/audits/${id}`);
 
@@ -34,7 +38,7 @@ function AuditDetail({ id }: { id: string }) {
   );
 }
 
-export function HistoryTab() {
+export function HistoryTab({ showRevisor = true }: Props) {
   const { data, error, loading } = useResource<PagedResponse<AuditListItemDto>>('/audits');
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -53,7 +57,8 @@ export function HistoryTab() {
           >
             <p className="font-medium">{audit.storeLabel}</p>
             <p className="text-sm text-muted">
-              {audit.revisorName} · {new Date(audit.createdAt).toLocaleString('uk-UA')}
+              {showRevisor && `${audit.revisorName} · `}
+              {new Date(audit.createdAt).toLocaleString('uk-UA')}
             </p>
             <p className="mt-1 text-sm font-semibold">
               {audit.total}/{audit.maxTotal} | {audit.percent}%
