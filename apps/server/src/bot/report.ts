@@ -23,7 +23,7 @@ function render(report: ReportInput, withComments: boolean): string {
   const summary = calcScore(report.items);
 
   const lines = report.items.map((item) => {
-    const score = item.score === 0 ? '—' : String(item.score);
+    const score = String(item.score);
     const comment =
       withComments && item.comment
         ? `\n   <i>${escapeHtml(shorten(item.comment, MAX_COMMENT_LENGTH))}</i>`
