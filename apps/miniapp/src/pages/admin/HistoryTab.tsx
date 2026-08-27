@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { AuditDetailDto, AuditListItemDto, PagedResponse } from '@sa/shared';
 import { useResource } from '../../hooks/useResource.js';
-import { PhotoThumb } from '../../components/PhotoThumb.js';
+import { PhotoGallery } from '../../components/PhotoGallery.js';
 
 interface Props {
   showRevisor?: boolean;
@@ -25,13 +25,7 @@ function AuditDetail({ id }: { id: string }) {
 
           {item.comment && <p className="text-xs text-muted">{item.comment}</p>}
 
-          {item.photos.length > 0 && (
-            <div className="mt-1 flex gap-2">
-              {item.photos.map((key) => (
-                <PhotoThumb key={key} photoKey={key} />
-              ))}
-            </div>
-          )}
+          <PhotoGallery photos={item.photos} />
         </div>
       ))}
     </div>
