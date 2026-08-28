@@ -13,6 +13,7 @@ export const auditItemInputSchema = z.object({
 export const submitAuditSchema = z
   .object({
     storeId: z.string().min(1),
+    sellerName: z.string().trim().min(1, 'Вкажіть ПІБ продавця').max(120),
     items: z.array(auditItemInputSchema).min(1),
   })
   .refine((body) => new Set(body.items.map((i) => i.itemId)).size === body.items.length, {

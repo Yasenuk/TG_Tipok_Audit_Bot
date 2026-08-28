@@ -28,6 +28,7 @@ auditsRouter.post('/', async (req, res, next) => {
     void sendReport(user.tgId, {
       storeLabel: `${audit.store.city}, ${audit.store.address}`,
       revisorName: user.name,
+      sellerName: audit.sellerName,
       createdAt: audit.createdAt,
       items: audit.items,
     }).catch((error: unknown) => {
@@ -75,6 +76,7 @@ auditsRouter.get('/', async (req, res, next) => {
       storeId: audit.storeId,
       storeLabel: `${audit.store.city}, ${audit.store.address}`,
       revisorName: audit.user.name,
+      sellerName: audit.sellerName,
       total: audit.total,
       maxTotal: audit.maxTotal,
       percent: percentOf(audit.total, audit.maxTotal),
@@ -114,6 +116,7 @@ auditsRouter.get('/:id', async (req, res, next) => {
       storeId: audit.storeId,
       storeLabel: `${audit.store.city}, ${audit.store.address}`,
       revisorName: audit.user.name,
+      sellerName: audit.sellerName,
       total: audit.total,
       maxTotal: audit.maxTotal,
       percent: percentOf(audit.total, audit.maxTotal),

@@ -51,6 +51,7 @@ model Audit {
   userId    String
   total     Int
   maxTotal  Int
+  sellerName String?
   createdAt DateTime @default(now())
 
   store Store       @relation(fields: [storeId], references: [id])

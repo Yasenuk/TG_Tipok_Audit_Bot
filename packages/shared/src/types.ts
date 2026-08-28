@@ -25,6 +25,7 @@ export interface AuditListItemDto {
   storeId: string;
   storeLabel: string;
   revisorName: string;
+  sellerName: string | null;
   total: number;
   maxTotal: number;
   percent: number;

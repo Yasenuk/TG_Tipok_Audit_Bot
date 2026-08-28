@@ -54,6 +54,10 @@ export function HistoryTab({ showRevisor = true }: Props) {
               {showRevisor && `${audit.revisorName} · `}
               {new Date(audit.createdAt).toLocaleString('uk-UA')}
             </p>
+            {audit.sellerName && (
+              <p className="text-sm text-muted">Продавець: {audit.sellerName}</p>
+            )}
+
             <p className="mt-1 text-sm font-semibold">
               {audit.total}/{audit.maxTotal} | {audit.percent}%
             </p>

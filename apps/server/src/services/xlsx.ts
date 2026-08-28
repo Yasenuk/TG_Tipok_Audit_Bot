@@ -5,6 +5,7 @@ import { prisma } from '@sa/db';
 const LABEL_COLUMN_WIDTH = 55;
 const DATE_COLUMN_WIDTH = 12;
 const TOTAL_LABEL = 'Загальна к-л балів:';
+const SELLER_LABEL = 'Продавець:';
 
 const BORDER: Partial<ExcelJS.Borders> = {
   top: { style: 'thin' },
@@ -15,6 +16,7 @@ const BORDER: Partial<ExcelJS.Borders> = {
 
 export interface ExportAudit {
   createdAt: Date;
+  sellerName: string | null;
   items: Array<{ itemLabel: string; itemOrder: number; score: number; comment: string | null }>;
 }
 
@@ -45,6 +47,12 @@ export function renderStoreSheet(sheet: ExcelJS.Worksheet, audits: ExportAudit[]
     const cell = header.getCell(index + 2);
     cell.numFmt = 'dd.mm.yyyy';
     cell.alignment = { horizontal: 'center' };
+  });
+
+  const sellerRow = sheet.addRow([SELLER_LABEL, ...audits.map((audit) => audit.sellerName ?? '')]);
+  sellerRow.getCell(1).alignment = { horizontal: 'right' };
+  audits.forEach((_, index) => {
+    sellerRow.getCell(index + 2).alignment = { horizontal: 'center', wrapText: true };
   });
 
   for (const label of labels) {
@@ -127,13 +135,16 @@ export async function buildWorkbook(query: ExportQuery): Promise<ExcelJS.Workboo
       audits: [],
     };
 
-    group.audits.push({ createdAt: audit.createdAt, items: audit.items });
+    group.audits.push({
+      createdAt: audit.createdAt,
+      sellerName: audit.sellerName,
+      items: audit.items,
+    });
     byStore.set(audit.storeId, group);
   }
 
   const groups = [...byStore.values()].sort((a, b) => a.order - b.order);
 
-  // Книга без жодного аркуша — побитий файл, Excel його не відкриє
   if (groups.length === 0) {
     workbook.addWorksheet('Немає даних').addRow(['За вибраний період перевірок немає']);
     return workbook;

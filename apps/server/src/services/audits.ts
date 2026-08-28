@@ -31,6 +31,7 @@ export async function createAudit(user: AuthUser, input: SubmitAuditInput) {
     data: {
       storeId: store.id,
       userId: user.id,
+      sellerName: input.sellerName,
       total: summary.total,
       maxTotal: summary.maxTotal,
       items: {
