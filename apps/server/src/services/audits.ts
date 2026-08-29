@@ -55,3 +55,12 @@ export async function createAudit(user: AuthUser, input: SubmitAuditInput) {
     },
   });
 }
+
+export async function getReportRecipients(): Promise<string[]> {
+  const users = await prisma.user.findMany({
+    where: { isActive: true },
+    select: { tgId: true },
+  });
+
+  return users.map((user) => user.tgId);
+}

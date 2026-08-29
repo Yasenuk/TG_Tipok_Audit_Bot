@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { calcScore, submitAuditSchema, type AuditListItemDto } from '@sa/shared';
 import { prisma } from '@sa/db';
-import { createAudit } from '../services/audits.js';
+import { createAudit, getReportRecipients } from '../services/audits.js';
 import { sendReport } from '../bot/report.js';
 import { HttpError } from '../lib/http-error.js';
 
@@ -24,14 +24,17 @@ auditsRouter.post('/', async (req, res, next) => {
     const user = req.user!;
     const audit = await createAudit(user, body);
 
-    // Звіт не має права завалити збереження: логуємо і йдемо далі
-    void sendReport(user.tgId, {
-      storeLabel: `${audit.store.city}, ${audit.store.address}`,
-      revisorName: user.name,
-      sellerName: audit.sellerName,
-      createdAt: audit.createdAt,
-      items: audit.items,
-    }).catch((error: unknown) => {
+    void (async () => {
+      const recipients = await getReportRecipients();
+
+      await sendReport(recipients, {
+        storeLabel: `${audit.store.city}, ${audit.store.address}`,
+        revisorName: user.name,
+        sellerName: audit.sellerName,
+        createdAt: audit.createdAt,
+        items: audit.items,
+      });
+    })().catch((error: unknown) => {
       console.error(`sendReport failed (audit ${audit.id}):`, error);
     });
 

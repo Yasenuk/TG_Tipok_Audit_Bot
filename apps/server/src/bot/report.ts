@@ -1,12 +1,11 @@
+import type { Message } from 'telegraf/types';
 import { calcScore, formatSummary } from '@sa/shared';
 import { bot } from './index.js';
 import { createPresignedGet } from '../services/r2.js';
 
-/** Telegram ріже повідомлення на 4096 символах, а коментарів може бути 18 по 500 */
 const MAX_MESSAGE_LENGTH = 4096;
 const MAX_COMMENT_LENGTH = 120;
 
-/** Медіагрупа вміщає від 2 до 10 елементів - одне фото доводиться слати окремо */
 const MEDIA_GROUP_SIZE = 10;
 const MAX_CAPTION_LENGTH = 1024;
 const GROUP_DELAY_MS = 1000;
@@ -24,6 +23,11 @@ interface ReportInput {
   sellerName: string | null;
   createdAt: Date;
   items: ReportItem[];
+}
+
+interface OutgoingPhoto {
+  media: string;
+  caption: string;
 }
 
 function escapeHtml(value: string): string {
@@ -76,14 +80,18 @@ export function formatReport(report: ReportInput): string {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function collectPhotos(items: ReportItem[]): Promise<Array<{ url: string; caption: string }>> {
-  const photos: Array<{ url: string; caption: string }> = [];
+function largestFileId(sizes: readonly { file_id: string }[] | undefined): string | undefined {
+  return sizes?.at(-1)?.file_id;
+}
+
+async function collectPhotos(items: ReportItem[]): Promise<OutgoingPhoto[]> {
+  const photos: OutgoingPhoto[] = [];
 
   for (const item of items) {
     for (const key of item.photos) {
       try {
         photos.push({
-          url: await createPresignedGet(key),
+          media: await createPresignedGet(key),
           caption: shorten(`${item.itemLabel} — ${item.score}`, MAX_CAPTION_LENGTH),
         });
       } catch (error) {
@@ -95,38 +103,70 @@ async function collectPhotos(items: ReportItem[]): Promise<Array<{ url: string; 
   return photos;
 }
 
-async function sendPhotos(chatId: string | number, items: ReportItem[]): Promise<void> {
+async function sendChunk(
+  chatId: string | number,
+  chunk: OutgoingPhoto[],
+): Promise<Array<string | undefined>> {
+  if (chunk.length === 1) {
+    const only = chunk[0]!;
+    const message = await bot.telegram.sendPhoto(chatId, only.media, { caption: only.caption });
+
+    return [largestFileId(message.photo)];
+  }
+
+  const messages = await bot.telegram.sendMediaGroup(
+    chatId,
+    chunk.map((photo) => ({ type: 'photo', media: photo.media, caption: photo.caption })),
+  );
+
+  return messages.map((message) =>
+    'photo' in message ? largestFileId((message as Message.PhotoMessage).photo) : undefined,
+  );
+}
+
+async function sendPhotos(chatIds: string[], items: ReportItem[]): Promise<void> {
   const photos = await collectPhotos(items);
   if (photos.length === 0) return;
 
-  for (let index = 0; index < photos.length; index += MEDIA_GROUP_SIZE) {
-    const chunk = photos.slice(index, index + MEDIA_GROUP_SIZE);
+  for (const chatId of chatIds) {
+    for (let index = 0; index < photos.length; index += MEDIA_GROUP_SIZE) {
+      const chunk = photos.slice(index, index + MEDIA_GROUP_SIZE);
 
-    try {
-      if (chunk.length === 1) {
-        const single = chunk[0]!;
-        await bot.telegram.sendPhoto(chatId, single.url, { caption: single.caption });
-      } else {
-        await bot.telegram.sendMediaGroup(
-          chatId,
-          chunk.map((photo) => ({ type: 'photo', media: photo.url, caption: photo.caption })),
-        );
+      try {
+        const fileIds = await sendChunk(chatId, chunk);
+
+        fileIds.forEach((fileId, offset) => {
+          const target = photos[index + offset];
+          if (target && fileId) target.media = fileId;
+        });
+      } catch (error) {
+        console.error(`report: медіагрупа не пішла в ${chatId}`, error);
       }
-    } catch (error) {
-      console.error('report: медіагрупа не відправилась', error);
-    }
 
-    if (index + MEDIA_GROUP_SIZE < photos.length) await delay(GROUP_DELAY_MS);
+      if (index + MEDIA_GROUP_SIZE < photos.length) await delay(GROUP_DELAY_MS);
+    }
   }
 }
 
-export async function sendReport(chatId: string | number, report: ReportInput): Promise<void> {
-  if (!chatId) {
-    console.warn('sendReport: не вказано chatId — звіт не відправлено');
+export async function sendReport(chatIds: string[], report: ReportInput): Promise<void> {
+  const recipients = [...new Set(chatIds.filter(Boolean))];
+
+  if (recipients.length === 0) {
+    console.warn('sendReport: немає кому відправляти звіт');
     return;
   }
 
-  await bot.telegram.sendMessage(chatId, formatReport(report), { parse_mode: 'HTML' });
+  const text = formatReport(report);
+  const delivered: string[] = [];
 
-  await sendPhotos(chatId, report.items);
+  for (const chatId of recipients) {
+    try {
+      await bot.telegram.sendMessage(chatId, text, { parse_mode: 'HTML' });
+      delivered.push(chatId);
+    } catch (error) {
+      console.error(`report: ${chatId} не отримав звіт`, error);
+    }
+  }
+
+  await sendPhotos(delivered, report.items);
 }
