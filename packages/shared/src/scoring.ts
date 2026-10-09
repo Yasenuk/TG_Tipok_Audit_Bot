@@ -1,7 +1,7 @@
 export const MAX_PER_ITEM = 5;
 
 export const MIN_WEIGHT = 1;
-export const MAX_WEIGHT = 3;
+export const MAX_WEIGHT = 10;
 export const DEFAULT_WEIGHT = 1;
 
 export function isApplicable(score: number): boolean {
