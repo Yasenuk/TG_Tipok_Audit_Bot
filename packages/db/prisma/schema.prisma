@@ -40,6 +40,7 @@ model ChecklistItem {
   id       String  @id @default(cuid())
   label    String
   order    Int
+  weight   Int     @default(1)
   isActive Boolean @default(true)
 
   auditItems AuditItem[]
@@ -69,6 +70,7 @@ model AuditItem {
   itemLabel String
   itemOrder Int
   score     Int
+  weight    Int      @default(1)
   comment   String?
   photos    String[]
 

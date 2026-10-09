@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import type { AuditDetailDto, AuditListItemDto, PagedResponse } from '@sa/shared';
+import {
+  formatCoverage,
+  type AuditDetailDto,
+  type AuditListItemDto,
+  type PagedResponse,
+} from '@sa/shared';
 import { useResource } from '../../hooks/useResource.js';
 import { PhotoGallery } from '../../components/PhotoGallery.js';
 
@@ -59,7 +64,8 @@ export function HistoryTab({ showRevisor = true }: Props) {
             )}
 
             <p className="mt-1 text-sm font-semibold">
-              {audit.total}/{audit.maxTotal} | {audit.percent}%
+              {audit.total}/{audit.maxTotal} | {audit.percent}% ·{' '}
+              {formatCoverage(audit.applicable, audit.itemsCount)}
             </p>
           </button>
 

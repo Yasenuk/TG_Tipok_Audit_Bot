@@ -7,7 +7,7 @@ checklistRouter.get('/', async (_req, res) => {
   const items = await prisma.checklistItem.findMany({
     where: { isActive: true },
     orderBy: { order: 'asc' },
-    select: { id: true, label: true, order: true },
+    select: { id: true, label: true, order: true, weight: true },
   });
 
   res.json(items);

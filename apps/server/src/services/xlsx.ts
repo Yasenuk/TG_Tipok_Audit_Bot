@@ -17,7 +17,13 @@ const BORDER: Partial<ExcelJS.Borders> = {
 export interface ExportAudit {
   createdAt: Date;
   sellerName: string | null;
-  items: Array<{ itemLabel: string; itemOrder: number; score: number; comment: string | null }>;
+  items: Array<{
+    itemLabel: string;
+    itemOrder: number;
+    score: number;
+    weight: number;
+    comment: string | null;
+  }>;
 }
 
 function collectLabels(audits: ExportAudit[]): string[] {

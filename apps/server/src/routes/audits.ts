@@ -1,6 +1,12 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { calcScore, submitAuditSchema, type AuditListItemDto } from '@sa/shared';
+import {
+  calcScore,
+  isApplicable,
+  percentOf,
+  submitAuditSchema,
+  type AuditListItemDto,
+} from '@sa/shared';
 import { prisma } from '@sa/db';
 import { createAudit, getReportRecipients } from '../services/audits.js';
 import { sendReport } from '../bot/report.js';
@@ -14,8 +20,10 @@ const listQuerySchema = z.object({
   storeId: z.string().optional(),
 });
 
-const percentOf = (total: number, maxTotal: number): number =>
-  maxTotal === 0 ? 0 : Math.round((total / maxTotal) * 100);
+const coverageOf = (items: ReadonlyArray<{ score: number }>) => ({
+  applicable: items.filter((item) => isApplicable(item.score)).length,
+  itemsCount: items.length,
+});
 
 // POST /api/audits — створити перевірку і відправити звіт ревізору в чат
 auditsRouter.post('/', async (req, res, next) => {
@@ -69,6 +77,7 @@ auditsRouter.get('/', async (req, res, next) => {
         include: {
           store: { select: { city: true, address: true } },
           user: { select: { name: true } },
+          items: { select: { score: true } },
         },
       }),
       prisma.audit.count({ where }),
@@ -83,6 +92,7 @@ auditsRouter.get('/', async (req, res, next) => {
       total: audit.total,
       maxTotal: audit.maxTotal,
       percent: percentOf(audit.total, audit.maxTotal),
+      ...coverageOf(audit.items),
       createdAt: audit.createdAt.toISOString(),
     }));
 
@@ -123,11 +133,13 @@ auditsRouter.get('/:id', async (req, res, next) => {
       total: audit.total,
       maxTotal: audit.maxTotal,
       percent: percentOf(audit.total, audit.maxTotal),
+      ...coverageOf(audit.items),
       createdAt: audit.createdAt.toISOString(),
       items: audit.items.map((item) => ({
         itemLabel: item.itemLabel,
         itemOrder: item.itemOrder,
         score: item.score,
+        weight: item.weight,
         comment: item.comment,
         photos: item.photos,
       })),

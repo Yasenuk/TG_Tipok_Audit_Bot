@@ -18,6 +18,7 @@ export interface ChecklistItemDto {
   id: string;
   label: string;
   order: number;
+  weight: number;
 }
 
 export interface AuditListItemDto {
@@ -29,6 +30,8 @@ export interface AuditListItemDto {
   total: number;
   maxTotal: number;
   percent: number;
+  applicable: number;
+  itemsCount: number;
   createdAt: string;
 }
 
@@ -36,6 +39,7 @@ export interface AuditItemDto {
   itemLabel: string;
   itemOrder: number;
   score: number;
+  weight: number;
   comment: string | null;
   photos: string[];
 }
@@ -64,6 +68,7 @@ export interface AdminChecklistItemDto {
   id: string;
   label: string;
   order: number;
+  weight: number;
   isActive: boolean;
 }
 

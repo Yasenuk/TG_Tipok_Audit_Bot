@@ -11,7 +11,7 @@ export async function createAudit(user: AuthUser, input: SubmitAuditInput) {
     prisma.store.findUnique({ where: { id: input.storeId } }),
     prisma.checklistItem.findMany({
       where: { id: { in: input.items.map((item) => item.itemId) } },
-      select: { id: true, label: true, order: true },
+      select: { id: true, label: true, order: true, weight: true },
     }),
   ]);
 
@@ -25,7 +25,9 @@ export async function createAudit(user: AuthUser, input: SubmitAuditInput) {
     throw new HttpError(409, 'Чек-лист змінився — перезавантажте форму');
   }
 
-  const summary = calcScore(input.items);
+  const summary = calcScore(
+    input.items.map((item) => ({ score: item.score, weight: byId.get(item.itemId)!.weight })),
+  );
 
   return prisma.audit.create({
     data: {
@@ -43,6 +45,7 @@ export async function createAudit(user: AuthUser, input: SubmitAuditInput) {
             itemLabel: snapshot.label,
             itemOrder: snapshot.order,
             score: item.score,
+            weight: snapshot.weight,
             comment: item.comment?.trim() || null,
             photos: item.photos,
           };

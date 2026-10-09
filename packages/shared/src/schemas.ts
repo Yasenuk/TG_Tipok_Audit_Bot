@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MAX_PER_ITEM } from './scoring.js';
+import { DEFAULT_WEIGHT, MAX_PER_ITEM, MAX_WEIGHT, MIN_WEIGHT } from './scoring.js';
 
 export const MAX_PHOTOS_PER_ITEM = 3;
 
@@ -35,13 +35,22 @@ export const storeUpdateSchema = storeInputSchema
   .extend({ sheetName: z.string().trim().min(1).max(31) })
   .partial();
 
-export const checklistItemInputSchema = z.object({
+const checklistItemFields = z.object({
   label: z.string().trim().min(1).max(200),
-  order: z.number().int().min(0).optional(),
-  isActive: z.boolean().default(true),
+  order: z.number().int().min(0),
+  isActive: z.boolean(),
+  weight: z.number().int().min(MIN_WEIGHT).max(MAX_WEIGHT),
 });
 
-export const checklistItemUpdateSchema = checklistItemInputSchema.partial();
+export const checklistItemInputSchema = checklistItemFields.extend({
+  order: checklistItemFields.shape.order.optional(),
+  isActive: checklistItemFields.shape.isActive.default(true),
+  weight: checklistItemFields.shape.weight.default(DEFAULT_WEIGHT),
+});
+
+// Без дефолтів: Zod 4 підставляє .default() навіть після .partial(),
+// і PATCH { weight } мовчки повертав би isActive = true
+export const checklistItemUpdateSchema = checklistItemFields.partial();
 
 export const reorderSchema = z.object({
   ids: z.array(z.string().min(1)).min(1),

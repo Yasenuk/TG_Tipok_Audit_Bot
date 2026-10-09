@@ -13,6 +13,7 @@ const GROUP_DELAY_MS = 1000;
 interface ReportItem {
   itemLabel: string;
   score: number;
+  weight: number;
   comment?: string | null;
   photos: string[];
 }
@@ -60,7 +61,6 @@ function render(report: ReportInput, withComments: boolean): string {
     ...lines,
     '',
     `<b>${formatSummary(summary)}</b>`,
-    summary.skipped > 0 ? `Не застосовано пунктів: ${summary.skipped}` : '',
     withComments ? '' : '<i>Коментарі не вмістились — дивіться в адмінці.</i>',
   ]
     .filter(Boolean)

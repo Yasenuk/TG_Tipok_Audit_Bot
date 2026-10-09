@@ -38,7 +38,9 @@ export function AuditForm({ storeId, me, onDone }: Props) {
   }, []);
 
   const untouched = items.filter((item) => (form.items[item.id]?.score ?? null) === null).length;
-  const summary = calcScore(items.map((item) => ({ score: form.items[item.id]?.score ?? 0 })));
+  const summary = calcScore(
+    items.map((item) => ({ score: form.items[item.id]?.score ?? 0, weight: item.weight })),
+  );
   const sellerMissing = form.sellerName.trim() === '';
 
   const patch = (itemId: string, next: Partial<ItemState>) =>

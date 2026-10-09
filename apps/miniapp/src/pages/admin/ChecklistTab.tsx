@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import type { AdminChecklistItemDto } from '@sa/shared';
+import { MAX_WEIGHT, MIN_WEIGHT, type AdminChecklistItemDto } from '@sa/shared';
 import { api, apiError } from '../../lib/api.js';
 import { useResource } from '../../hooks/useResource.js';
+
+const WEIGHTS = Array.from({ length: MAX_WEIGHT - MIN_WEIGHT + 1 }, (_, index) => MIN_WEIGHT + index);
 
 export function ChecklistTab() {
   const { data, error, loading, reload } = useResource<AdminChecklistItemDto[]>('/admin/checklist');
@@ -68,6 +70,11 @@ export function ChecklistTab() {
         {formError && <p className="mt-2 text-xs text-red-500">{formError}</p>}
       </div>
 
+      <p className="px-1 text-xs text-muted">
+        Вага ×{MIN_WEIGHT}–×{MAX_WEIGHT} - наскільки пункт важливий у підсумковому %. Нова вага діє на
+        нові перевірки, старі не перераховуються.
+      </p>
+
       {data?.map((item, index) => (
         <div
           key={item.id}
@@ -97,6 +104,24 @@ export function ChecklistTab() {
           </div>
 
           <p className="flex-1 text-sm">{item.label}</p>
+
+          <select
+            value={item.weight}
+            onChange={(event) =>
+              void run(() =>
+                api.patch(`/admin/checklist/${item.id}`, { weight: Number(event.target.value) }),
+              )
+            }
+            disabled={busy}
+            aria-label="Вага пункту"
+            className="rounded-lg bg-bg p-1 text-xs disabled:opacity-50"
+          >
+            {WEIGHTS.map((weight) => (
+              <option key={weight} value={weight}>
+                ×{weight}
+              </option>
+            ))}
+          </select>
 
           <button
             type="button"
